@@ -36,11 +36,11 @@ services:
               count: 1
               capabilities: [gpu]
 
-  store_ash_dev:
+  ash_cloud_dev:
     build:
       context: ./store
       dockerfile: ./gpu.Dockerfile
-    container_name: store
+    container_name: cloud
     develop:
       watch:
         - action: sync
@@ -66,7 +66,7 @@ services:
       - internet
       - data
     depends_on:
-      - store_pgvector_dev
+      - cloud_pgvector_dev
     ports:
       - "4799:4004"
     environment:
@@ -77,18 +77,18 @@ services:
     command:
       - /app/gpu.sh
 
-  store_pgvector_dev:
+  cloud_pgvector_dev:
     image: pgvector/pgvector:pg17
-    container_name: store_pgvector_dev
+    container_name: cloud-pgvector-dev
     ports:
-     - 5799:5432
+     - 5991:5432
     networks:
       - data
     restart: always
     environment:
-      - POSTGRES_DB=store_pgvector_dev
+      - POSTGRES_DB=cloud-pgvector-dev
       - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=cohort9theory+Defy
+      - POSTGRES_PASSWORD=likefacethencemelody8decent9Liz
     volumes:
       - ./pgvector-init:/docker-entrypoint-initdb.d/
       - postgres_data:/var/lib/postgresql
