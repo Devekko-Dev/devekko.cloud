@@ -31,3 +31,73 @@ Created   bin/build-cloud.sh
 Created   bin/build_script-cloud.sh
 Created   bin/deploy-cloud.sh
 Created   bin/deploy_script-cloud.sh
+
+
+ssh root@cloud "doas hostname cloud; doas sysrc hostname=cloud"
+ssh root@cloud2 "doas hostname cloud2; doas sysrc hostname=cloud2"
+ssh root@database "doas hostname database; doas sysrc hostname=database"
+ssh root@database2 "doas hostname database2; doas sysrc hostname=database2"
+ssh root@build "doas hostname build; doas sysrc hostname=build"
+
+bsd_install.sh root@cloud web+proxy.conf
+
+
+mix horizon.ops.init
+
+ sh cloud/ops/bin/bsd_install.sh cloud horizon/web+proxy.conf
+
+
+ Number of packages to be installed: 2
+
+The process will require 9 MiB more space.
+2 MiB to be downloaded.
+[1/2] Fetching nginx-1.26.2_9,3.pkg: .......... done
+[2/2] Fetching pcre2-10.43.pkg: .......... done
+Checking integrity... done (0 conflicting)
+[1/2] Installing pcre2-10.43...
+[1/2] Extracting pcre2-10.43: .......... done
+[2/2] Installing nginx-1.26.2_9,3...
+===> Creating groups
+Using existing group 'www'
+===> Creating users
+Using existing user 'www'
+[2/2] Extracting nginx-1.26.2_9,3: .......... done
+=====
+Message from nginx-1.26.2_9,3:
+
+--
+Recent version of the NGINX introduces dynamic modules support.  In
+FreeBSD ports tree this feature was enabled by default with the DSO
+knob.  Several vendor's and third-party modules have been converted
+to dynamic modules.  Unset the DSO knob builds an NGINX without
+dynamic modules support.
+
+To load a module at runtime, include the new `load_module'
+directive in the main context, specifying the path to the shared
+object file for the module, enclosed in quotation marks.  When you
+reload the configuration or restart NGINX, the module is loaded in.
+It is possible to specify a path relative to the source directory,
+or a full path, please see
+https://www.nginx.com/blog/dynamic-modules-nginx-1-9-11/ and
+http://nginx.org/en/docs/ngx_core_module.html#load_module for
+details.
+
+Default path for the NGINX dynamic modules is
+
+/usr/local/libexec/nginx.
+[INFO] nginx installed successfully.
+Updating PATH for nginx
+nginx_enable:  -> YES
+[INFO] nginx service enabled.
+Performing sanity check on nginx configuration:
+nginx: the configuration file /usr/local/etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /usr/local/etc/nginx/nginx.conf test is successful
+Starting nginx.
+[SUCCESS] [INFO] nginx service started.
+
+
+bsd_install.sh admin@demo-pg1 postgres.conf
+
+
+ sh cloud/ops/bin/freebsd_setup.sh database
+ sh cloud/ops/bin/bsd_install.sh database horizon/postgres.conf
