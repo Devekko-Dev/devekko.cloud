@@ -157,3 +157,7 @@ projects = [
 
 sh ./bin/stage-cloud.sh --force
 sh ./bin/build-cloud.sh --force 
+
+
+freebsd-update fetch
+freebsd-update install
