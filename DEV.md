@@ -99,5 +99,61 @@ Starting nginx.
 bsd_install.sh admin@demo-pg1 postgres.conf
 
 
- sh cloud/ops/bin/freebsd_setup.sh database
- sh cloud/ops/bin/bsd_install.sh database horizon/postgres.conf
+
+ssh admin@cloud "doas hostname cloud; doas sysrc hostname=cloud"
+ssh admin@database "doas hostname database; doas sysrc hostname=database"
+ssh admin@build "doas hostname build; doas sysrc hostname=build"
+ssh admin@cloud2 "doas hostname cloud2; doas sysrc hostname=cloud2"
+ssh admin@database2 "doas hostname database2; doas sysrc hostname=database2"
+
+
+sh cloud/ops/bin/freebsd_setup.sh database
+sh cloud/ops/bin/bsd_install.sh database horizon/postgres.conf
+
+
+sh cloud/ops/bin/freebsd_setup.sh cloud
+sh cloud/ops/bin/bsd_install.sh cloud horizon/web+proxy.conf
+
+
+sh cloud/ops/bin/freebsd_setup.sh build
+sh cloud/ops/bin/bsd_install.sh build horizon/build.conf
+
+
+sh cloud/ops/bin/freebsd_setup.sh database2
+sh cloud/ops/bin/bsd_install.sh database2 horizon/postgres-backup.conf
+
+
+./ops/bin/bsd_install.sh admin@demo-pg2 postgres-backup.conf
+
+
+chown -R admin:admin /home/admin
+
+
+
+user = "admin"
+host = "cloud"
+
+projects = [
+  %Horizon.Project{
+    name: "cloud",
+    server_names: ["cloud"],
+    http_only: true,
+    # certificate: :letsencrypt,
+    # letsencrypt_domain: "cloud.folkbot.dev",
+    servers: [
+      # Verify PORT is same as in runtime.exs or env.sh.eex
+      %Horizon.Server{internal_ip: "10.0.0.2", port: 4000},
+      %Horizon.Server{internal_ip: "10.0.0.5", port: 4000}
+    ]
+  }
+]
+
+
+ IO.puts Horizon.NginxConfig.generate(projects)
+
+
+ ./bin/stage-cloud.sh --force
+ ./bin/build-cloud.sh --force
+
+sh ./bin/stage-cloud.sh --force
+sh ./bin/build-cloud.sh --force 
